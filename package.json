@@ -1,0 +1,18 @@
+{
+  "name": "tl-draw-mcp",
+  "private": true,
+  "version": "0.1.0",
+  "description": "MCP server + Claude Code skill for drawing on a live tldraw canvas from prompts.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev": "npm run dev --workspace @tldraw-mcp/server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
