@@ -89,5 +89,5 @@ examples/         sample MCP config (if you prefer JSON over the CLI)
 | `npm install` peer-dep error                        | Retry with `npm install --legacy-peer-deps`.                                            |
 
 ---
-
-See `plan.md` for design notes and `LICENSE` for MIT terms.
+I AM A BULK COMMITTER
+`LICENSE` for MIT terms.
