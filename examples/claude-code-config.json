@@ -1,8 +1,16 @@
 {
+  "_comment": [
+    "Claude Code / Claude Desktop MCP config. Prefer the CLI over editing JSON:",
+    "  claude mcp add tldraw --scope user -- node /absolute/path/to/tl-draw-mcp/packages/server/dist/index.js",
+    "On Windows use forward slashes in the path, or wrap with: cmd /c node \"D:/...\""
+  ],
   "mcpServers": {
     "tldraw": {
-      "command": "cmd",
-      "args": ["/c", "npx", "-y", "@tldraw-mcp/server"]
+      "command": "node",
+      "args": ["/absolute/path/to/tl-draw-mcp/packages/server/dist/index.js"],
+      "env": {
+        "TLDRAW_MCP_PORT": "3030"
+      }
     }
   }
 }

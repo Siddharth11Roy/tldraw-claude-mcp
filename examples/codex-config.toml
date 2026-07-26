@@ -1,0 +1,17 @@
+# Codex CLI — add to ~/.codex/config.toml
+#
+# Or, without editing the file by hand:
+#   codex mcp add tldraw -- node /absolute/path/to/tl-draw-mcp/packages/server/dist/index.js
+
+[mcp_servers.tldraw]
+command = "node"
+args = ["/absolute/path/to/tl-draw-mcp/packages/server/dist/index.js"]
+
+# Optional. The canvas is served on 3030 by default and falls back to 3031,
+# 3032, ... if that port is taken.
+# env = { TLDRAW_MCP_PORT = "3030" }
+
+# Windows: point at node.exe explicitly and use forward slashes.
+# [mcp_servers.tldraw]
+# command = "node"
+# args = ["D:/code/tl-draw-mcp/packages/server/dist/index.js"]

@@ -1,15 +1,16 @@
 {
   "name": "tl-draw-mcp",
   "private": true,
-  "version": "0.1.0",
-  "description": "MCP server + Claude Code skill for drawing on a live tldraw canvas from prompts.",
+  "version": "0.2.0",
+  "description": "MCP server for drawing diagrams on a live tldraw canvas. Works with Claude Code, Codex and any MCP client.",
   "license": "MIT",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build --workspace @tldraw-mcp/web && npm run build --workspace @tldraw-mcp/server",
     "test": "npm run test --workspaces --if-present",
+    "test:e2e": "node e2e/canvas.mjs",
     "dev": "npm run dev --workspace @tldraw-mcp/server"
   },
   "engines": {

@@ -2,8 +2,13 @@ import { WebSocketServer, WebSocket } from "ws";
 import type { Server as HttpServer } from "node:http";
 import { Bridge, BridgeOp, BridgeReply, BridgeTimeoutError } from "./bridge.js";
 
-const PROTOCOL_VERSION = 1;
-const DEFAULT_TIMEOUT_MS = 5000;
+// Bumped when the browser protocol changes incompatibly. v2 adds the
+// connect/clear/fit ops and arrow bindings.
+const PROTOCOL_VERSION = 2;
+
+// A 300-shape batch with bindings takes the browser noticeably longer than a
+// single rectangle, and a cold tab has to boot tldraw first.
+const DEFAULT_TIMEOUT_MS = 20_000;
 
 interface Pending {
   resolve: (r: BridgeReply) => void;
@@ -11,16 +16,27 @@ interface Pending {
   timer: NodeJS.Timeout;
 }
 
+export interface WsBridgeOptions {
+  timeoutMs?: number;
+  port?: number;
+}
+
 export class WsBridge implements Bridge {
   private wss: WebSocketServer;
   private client: WebSocket | null = null;
   private pending = new Map<string, Pending>();
   private timeoutMs: number;
+  private port: number;
 
-  constructor(server: HttpServer, opts: { timeoutMs?: number } = {}) {
+  constructor(server: HttpServer, opts: WsBridgeOptions = {}) {
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.port = opts.port ?? 3030;
     this.wss = new WebSocketServer({ server, path: "/ws" });
     this.wss.on("connection", (ws) => this.handleClient(ws));
+  }
+
+  canvasUrl(): string {
+    return `http://localhost:${this.port}`;
   }
 
   isConnected(): boolean {
@@ -80,6 +96,12 @@ export class WsBridge implements Bridge {
 
     ws.on("close", () => {
       if (this.client === ws) this.client = null;
+      // Fail fast instead of making every in-flight call wait out its timeout.
+      for (const [id, p] of this.pending) {
+        clearTimeout(p.timer);
+        p.reject(new Error("The tldraw browser tab disconnected before replying."));
+        this.pending.delete(id);
+      }
     });
   }
 }

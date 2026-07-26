@@ -1,63 +1,122 @@
 ---
 name: tldraw
-description: Draw, diagram, sketch, wireframe, mind-map, or flowchart on a live tldraw canvas via the tldraw-mcp server. Use whenever the user asks to visualize, draw, sketch, diagram, or lay out something graphically.
+description: Draw, diagram, sketch, wireframe, mind-map, or flowchart on a live tldraw canvas via the tldraw-mcp server. Use whenever the user asks to visualize, draw, sketch, diagram, or lay out something graphically — and instead of writing mermaid when a canvas is available.
 ---
 
 # tldraw skill
 
-You can draw on a live tldraw canvas through the `tldraw-mcp` MCP server. The user sees your output appear in real time at `http://localhost:3030`.
+You can draw on a live tldraw canvas through the `tldraw` MCP server. The user
+watches your output appear in real time at `http://localhost:3030`.
 
 ## Before drawing
 
-If you have not yet drawn this session, tell the user once:
+If you have not drawn yet this session, tell the user once:
 
 > Open `http://localhost:3030` in your browser to see the canvas.
 
-If a tool returns `No tldraw browser connected`, repeat that hint.
+If a tool reports that no canvas is connected, repeat that hint and retry.
 
-## Tools
+## Pick the right tool
 
-- `create_shape({ shapes: [...] })` — add new shapes.
-- `update_shape({ updates: [{ id, props }] })` — change shapes by id.
-- `delete_shape({ ids: [...] })` — remove shapes.
-- `get_canvas()` — return all current shapes. Call this first whenever the user says "add to", "next to", "modify", or refers to something already on the canvas.
+| Situation | Tool |
+|---|---|
+| Flowchart, architecture, state machine, sequence, org chart, dependency graph, mind map — anything with nodes and edges | `create_diagram` |
+| Free-form drawing, wireframes, annotations, sketching | `create_shape` |
+| Linking shapes that already exist | `connect_shapes` |
+| Changing something already drawn | `get_canvas` → `update_shape` |
 
-## Coordinate system
+**Use `create_diagram` instead of writing mermaid.** It takes the same
+nodes-and-edges description and renders it natively: it measures each label,
+assigns layers, minimises crossings and binds the connectors.
 
-- Origin `(0, 0)` is top-left. `+x` is right, `+y` is down.
-- Aim within `0 ≤ x ≤ 1600`, `0 ≤ y ≤ 900` unless asked otherwise.
-- Sizes (`w`, `h`) in pixels. Default to ~120×80 for boxes, ~60×60 for icons.
+**Never compute `x`/`y` for a diagram.** Hand-placed coordinates are what
+produce overlapping boxes and crossing arrows — that is exactly the work this
+tool exists to do.
 
-## Shape vocabulary
+## create_diagram
 
-| type   | required               | optional                                    |
-|--------|------------------------|---------------------------------------------|
-| `geo`  | `x, y, w, h`           | `geo` (rectangle/ellipse/triangle/diamond/star/...), `color`, `fill`, `text` |
-| `text` | `x, y, text`           | `color`, `size` (s/m/l/xl)                  |
-| `arrow`| `x, y, end:{x,y}`      | `color`, `text` (label)                     |
-| `line` | `x, y, end:{x,y}`      | `color`                                     |
-| `draw` | `x, y, points:[{x,y}]` | `color` — freehand, ≥2 points               |
-| `note` | `x, y, text`           | `color` — sticky note                       |
-
-Colors: `black, grey, light-violet, violet, blue, light-blue, yellow, orange, green, light-green, red`.
-Fills: `none, semi, solid, pattern`.
-
-## Patterns
-
-**Flowchart node + arrow:**
 ```json
-{ "shapes": [
-  { "type": "geo", "geo": "rectangle", "x": 100, "y": 100, "w": 160, "h": 80, "text": "Start", "color": "blue" },
-  { "type": "geo", "geo": "rectangle", "x": 400, "y": 100, "w": 160, "h": 80, "text": "End", "color": "green" },
-  { "type": "arrow", "x": 260, "y": 140, "end": { "x": 400, "y": 140 } }
-] }
+{
+  "title": "Login flow",
+  "direction": "down",
+  "nodes": [
+    { "id": "start", "label": "Start", "role": "start" },
+    { "id": "form", "label": "Show login form" },
+    { "id": "check", "label": "Credentials valid?", "role": "decision" },
+    { "id": "home", "label": "Go to dashboard", "role": "success" },
+    { "id": "retry", "label": "Show error", "role": "error" }
+  ],
+  "edges": [
+    { "from": "start", "to": "form" },
+    { "from": "form", "to": "check" },
+    { "from": "check", "to": "home", "label": "yes" },
+    { "from": "check", "to": "retry", "label": "no" },
+    { "from": "retry", "to": "form" }
+  ]
+}
 ```
 
-**Sticky note cluster:** use `note`, space them ~220px apart horizontally.
+- `direction`: `down` (mermaid TD), `right` (LR), `up`, `left`.
+- `connector`: `elbow` (default, right-angled) or `arc`.
+- `role` sets shape + colour conventionally, so describe meaning not styling:
+  `process` (default), `start`, `end`, `decision`, `io`, `data`, `external`,
+  `error`, `success`, `note`.
+- `replace: true` clears the canvas first — use when redrawing from scratch.
+- `rank` pins a node to a specific layer; `spacing` and `origin` override geometry.
+
+Cycles are detected automatically and bowed around the outside of the diagram,
+so feedback loops don't cut back through the nodes. Re-running the same node ids
+updates in place rather than duplicating, so iterate freely.
+
+## Linking — the rule that matters
+
+Connect shapes **by id**, never by coordinates:
+
+```json
+{ "type": "arrow", "from": "login", "to": "dashboard", "text": "on success" }
+```
+
+A bound arrow anchors on each shape's edge and re-routes when either end moves.
+An arrow built from raw `start`/`end` points just overlaps whatever is in the
+way. Use raw points only to point at empty space.
+
+## create_shape vocabulary
+
+| type    | required            | notable options |
+|---------|---------------------|-----------------|
+| `geo`   | `x, y`              | `w`/`h` (omit to auto-size to `text`), `geo`, `text`, `color`, `fill`, `dash`, `size`, `align` |
+| `text`  | `x, y, text`        | `color`, `size` (s/m/l/xl), `font`, `w` to wrap |
+| `arrow` | `from`+`to`, or a start and `end` | `text`, `kind` (`elbow`/`arc`), `bend`, `dash`, `arrowheadStart`/`arrowheadEnd` |
+| `line`  | `end` or `points`   | `color`, `dash`, `spline` |
+| `draw`  | `x, y, points` (≥2) | `color`, `closed` — freehand |
+| `note`  | `x, y, text`        | `color` — sticky, fixed size |
+| `frame` | `x, y, w, h`        | `name` — titled container for grouping |
+
+Coordinates: origin top-left, `+x` right, `+y` down. Give shapes an `id` so you
+can reference them from arrows and later edits.
+
+Colours: `black, grey, light-violet, violet, blue, light-blue, yellow, orange,
+green, light-green, light-red, red, white`.
+Fills: `none, semi, solid, pattern, fill`. Dashes: `draw, solid, dashed, dotted`.
+
+## Editing
+
+`get_canvas` returns every shape with resolved geometry, its label, and for
+arrows the ids each end is bound to. Call it before any edit that refers to
+existing content, then use the same field names to change things:
+
+```json
+{ "updates": [{ "id": "check", "props": { "color": "red", "text": "Valid?" } }] }
+```
+
+`delete_shape({ ids: [...] })` removes shapes; `delete_shape({ all: true })`
+clears the canvas. Arrows bound to a deleted shape are removed with it.
 
 ## Pitfalls
 
-- `text` shapes must include `text` (non-empty).
-- `arrow.end` is an absolute point, not a delta.
-- Don't send more than 200 shapes in one `create_shape` call — split into batches.
-- For edits, always call `get_canvas` first to discover the real shape ids.
+- Don't hand-place a diagram — that's what `create_diagram` is for.
+- `arrow.end` is an absolute point, not a delta, and is ignored when `to` is set.
+- `text` shapes need non-empty `text`.
+- Split batches larger than 300 shapes.
+- `x-box` and `check-box` draw their mark across the whole shape, through any
+  label — prefer a coloured rectangle for success/failure states.

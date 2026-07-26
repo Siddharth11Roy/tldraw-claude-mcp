@@ -1,6 +1,6 @@
 {
   "name": "@tldraw-mcp/server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server that drives a live tldraw canvas.",
   "license": "MIT",
   "type": "module",
@@ -21,7 +21,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "ws": "^8.18.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
