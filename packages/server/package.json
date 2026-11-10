@@ -1,6 +1,6 @@
 {
   "name": "@tldraw-mcp/server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "MCP server that drives a live tldraw canvas.",
   "license": "MIT",
   "type": "module",

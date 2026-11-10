@@ -13,9 +13,9 @@ import {
 import { zodToJsonSchema, EMPTY_SCHEMA } from "./jsonSchema.js";
 
 /**
- * Server-level instructions. Claude Code has the bundled skill, but Codex and
- * other MCP clients have no equivalent — for them this text plus the tool
- * descriptions are the entire briefing, so the important rules live here.
+ * Server-level instructions. Claude Code and the Codex plugin ship the full
+ * skill, but a manual setup or another MCP client gets only this text plus the
+ * tool descriptions — so the important rules live here too.
  */
 export const INSTRUCTIONS = `Draws on a live tldraw canvas that the user watches in a browser.
 
@@ -38,7 +38,7 @@ Before editing something already drawn, call \`get_canvas\` to read the real ids
 
 export function createMcpServer(bridge: Bridge): Server {
   const server = new Server(
-    { name: "tldraw-mcp", version: "0.2.0" },
+    { name: "tldraw-mcp", version: "0.3.0" },
     { capabilities: { tools: {} }, instructions: INSTRUCTIONS }
   );
 

@@ -2,3 +2,8 @@
 *.png binary
 *.jpg binary
 *.gif binary
+
+# Build output committed so Codex can install the plugin without a build step.
+plugins/tldraw/server/** linguist-generated
+plugins/tldraw/public/** linguist-generated
+packages/server/public/** linguist-generated

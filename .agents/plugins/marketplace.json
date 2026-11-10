@@ -1,0 +1,20 @@
+{
+  "name": "tldraw-mcp",
+  "interface": {
+    "displayName": "tldraw MCP"
+  },
+  "plugins": [
+    {
+      "name": "tldraw",
+      "source": {
+        "source": "local",
+        "path": "./plugins/tldraw"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}
