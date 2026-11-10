@@ -15,6 +15,8 @@ unlike hand-placed coordinates the result is actually laid out.
 
 ## 1. Install
 
+**Codex users can skip this step:** the [Codex plugin](#codex) ships prebuilt.
+
 ```sh
 git clone <this repo> tl-draw-mcp
 cd tl-draw-mcp
@@ -48,23 +50,43 @@ xcopy /E /I .claude\skills\tldraw %USERPROFILE%\.claude\skills\tldraw
 
 ### Codex
 
+Install the plugin. It bundles the MCP server, the canvas and the `tldraw`
+skill into one package, so there's nothing to clone or build. The only
+requirement is Node 20+ on your `PATH`.
+
 ```sh
-codex mcp add tldraw -- node /absolute/path/to/tl-draw-mcp/packages/server/dist/index.js
+codex plugin marketplace add Siddharth11Roy/tldraw-claude-mcp
+codex plugin add tldraw@tldraw-mcp
 ```
 
-Or add it to `~/.codex/config.toml` by hand — see
-[`examples/codex-config.toml`](examples/codex-config.toml):
+Then restart Codex. The CLI and the desktop app share the same install.
 
-```toml
-[mcp_servers.tldraw]
-command = "node"
-args = ["/absolute/path/to/tl-draw-mcp/packages/server/dist/index.js"]
+| | |
+|---|---|
+| Update | `codex plugin marketplace upgrade tldraw-mcp && codex plugin add tldraw@tldraw-mcp` |
+| Uninstall | `codex plugin remove tldraw@tldraw-mcp` |
+| Port or timeout | Export `TLDRAW_MCP_PORT` / `TLDRAW_MCP_TIMEOUT_MS` before starting Codex; the plugin passes them through. |
+
+<details>
+<summary>Manual setup without the plugin</summary>
+
+From a clone, point Codex at the prebuilt bundle (no `npm install` needed):
+
+```sh
+codex mcp add tldraw -- node /absolute/path/to/tl-draw-mcp/plugins/tldraw/server/tldraw-mcp.mjs
 ```
 
-Codex has no skill mechanism, so the usage rules ship in the server's MCP
-`instructions` and in every tool description. For stronger steering, paste the
-short block at the end of [`docs/AGENT_GUIDE.md`](docs/AGENT_GUIDE.md) into your
-`AGENTS.md`.
+Or edit `~/.codex/config.toml` by hand; see
+[`examples/codex-config.toml`](examples/codex-config.toml). Use either the
+plugin or a manual entry, not both: they would register two servers both
+named `tldraw`.
+
+A manual setup doesn't install the skill. The usage rules still reach Codex
+through the server's MCP `instructions` and the tool descriptions. For
+stronger steering, paste the short block at the end of
+[`docs/AGENT_GUIDE.md`](docs/AGENT_GUIDE.md) into your `AGENTS.md`.
+
+</details>
 
 ### Any other MCP client
 
@@ -138,8 +160,9 @@ Full reference: [`docs/AGENT_GUIDE.md`](docs/AGENT_GUIDE.md).
 ## Develop
 
 ```sh
-npm test                                   # 59 unit tests
+npm test                                   # 60 unit tests
 npm run test:e2e                           # drives a real browser (needs playwright)
+npm run test:plugin                        # runs the Codex plugin from a clean copy
 npm run dev                                # stdio server + WS bridge on :3030
 npm run dev --workspace @tldraw-mcp/web    # Vite HMR on :5173
 ```
@@ -149,6 +172,21 @@ payload, not that tldraw accepts it. Shape props, bindings and rich text are
 only validated by tldraw at runtime, so `test:e2e` drives an actual canvas in
 Chrome and asserts on what comes back. It skips cleanly if Playwright isn't
 installed (`npm i -D playwright`).
+
+### The Codex plugin is generated, and committed
+
+Codex installs plugins straight from this repo with no build step, so
+`plugins/tldraw/` holds build output:
+- `server/tldraw-mcp.mjs`: the server and its npm dependencies, bundled with esbuild.
+- `public/`: the canvas.
+- `skills/tldraw/SKILL.md`: a copy of `.claude/skills/tldraw/SKILL.md`.
+
+`npm run build` regenerates all three. After changing server, web or skill
+code, rebuild and commit the result. `npm run check:plugin` fails if the
+committed plugin is stale.
+
+When you cut a release, bump `version` in
+`plugins/tldraw/.codex-plugin/plugin.json`. Codex caches installs by version.
 
 ### Layout
 
@@ -166,8 +204,11 @@ can't be measured in the browser.
 ```
 packages/server   MCP stdio server, WS bridge, static host, layout, tool handlers
 packages/web      Vite + React + tldraw browser app (builds into server/public)
-.claude/skills/   SKILL.md for Claude Code
-docs/             portable agent guide (Codex and other MCP clients)
+plugins/tldraw    Codex plugin: manifest, .mcp.json, bundled server, canvas, skill
+.agents/plugins/  Codex marketplace entry (what `codex plugin marketplace add` reads)
+.claude/skills/   SKILL.md for Claude Code (source of the plugin's copy)
+scripts/          Codex plugin build and smoke test
+docs/             portable agent guide (other MCP clients)
 e2e/              browser-driven end-to-end checks
 examples/         MCP config for Claude Code and Codex
 ```

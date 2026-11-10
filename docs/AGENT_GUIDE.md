@@ -1,8 +1,9 @@
 # Agent guide — drawing on the tldraw canvas
 
-Portable usage guidance for the `tldraw` MCP server. Claude Code gets this from
-the bundled skill; **Codex and other MCP clients have no skill mechanism**, so
-paste this file (or the short version at the bottom) into your `AGENTS.md`.
+Portable usage guidance for the `tldraw` MCP server. Claude Code and the Codex
+plugin get this from the bundled `tldraw` skill. For any other MCP client, or a
+manual Codex setup without the plugin, paste this file (or the short version
+at the bottom) into your `AGENTS.md`.
 
 The server also ships the same rules as MCP `instructions` and in each tool's
 description, so a client that surfaces those already has the essentials.

@@ -1,0 +1,43 @@
+{
+  "name": "tldraw",
+  "version": "0.3.0",
+  "description": "Draw flowcharts, architecture diagrams, wireframes and sketches on a live tldraw canvas in your browser.",
+  "author": {
+    "name": "Siddharth Roy",
+    "url": "https://github.com/Siddharth11Roy"
+  },
+  "homepage": "https://github.com/Siddharth11Roy/tldraw-claude-mcp",
+  "repository": "https://github.com/Siddharth11Roy/tldraw-claude-mcp",
+  "license": "MIT",
+  "keywords": [
+    "tldraw",
+    "diagram",
+    "flowchart",
+    "architecture",
+    "whiteboard",
+    "canvas",
+    "wireframe",
+    "mermaid",
+    "mcp"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "tldraw canvas",
+    "shortDescription": "Draw diagrams on a live tldraw canvas",
+    "longDescription": "Codex draws on a tldraw canvas you watch at http://localhost:3030. create_diagram takes nodes and edges and does the layout itself: it sizes each box to its label, arranges layers, reduces crossings and binds the arrows, so you get a clean flowchart or architecture diagram instead of mermaid. Free-form shapes, sticky notes, frames and edits by id are supported too. Runs locally; nothing leaves your machine.",
+    "developerName": "Siddharth Roy",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Write"],
+    "websiteURL": "https://github.com/Siddharth11Roy/tldraw-claude-mcp",
+    "defaultPrompt": [
+      "Draw this repo's architecture on the canvas",
+      "Sketch the login flow as a flowchart",
+      "Map how these modules depend on each other"
+    ],
+    "brandColor": "#2563EB",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg",
+    "screenshots": []
+  }
+}

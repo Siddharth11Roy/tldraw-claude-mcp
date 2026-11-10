@@ -1,11 +1,18 @@
-# Codex CLI — add to ~/.codex/config.toml
+# Codex — manual MCP setup. You don't need this if you installed the plugin:
+#   codex plugin marketplace add Siddharth11Roy/tldraw-claude-mcp
+#   codex plugin add tldraw@tldraw-mcp
+# Use one or the other, not both: each registers a server named `tldraw`.
 #
-# Or, without editing the file by hand:
-#   codex mcp add tldraw -- node /absolute/path/to/tl-draw-mcp/packages/server/dist/index.js
+# Add to ~/.codex/config.toml, or without editing the file by hand:
+#   codex mcp add tldraw -- node /absolute/path/to/tl-draw-mcp/plugins/tldraw/server/tldraw-mcp.mjs
+#
+# plugins/tldraw/server/tldraw-mcp.mjs is prebuilt and self-contained, so a plain
+# clone works without `npm install`. packages/server/dist/index.js also works
+# after `npm install && npm run build`.
 
 [mcp_servers.tldraw]
 command = "node"
-args = ["/absolute/path/to/tl-draw-mcp/packages/server/dist/index.js"]
+args = ["/absolute/path/to/tl-draw-mcp/plugins/tldraw/server/tldraw-mcp.mjs"]
 
 # Optional. The canvas is served on 3030 by default and falls back to 3031,
 # 3032, ... if that port is taken.
@@ -14,4 +21,4 @@ args = ["/absolute/path/to/tl-draw-mcp/packages/server/dist/index.js"]
 # Windows: point at node.exe explicitly and use forward slashes.
 # [mcp_servers.tldraw]
 # command = "node"
-# args = ["D:/code/tl-draw-mcp/packages/server/dist/index.js"]
+# args = ["D:/code/tl-draw-mcp/plugins/tldraw/server/tldraw-mcp.mjs"]

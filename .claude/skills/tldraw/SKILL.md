@@ -14,7 +14,9 @@ If you have not drawn yet this session, tell the user once:
 
 > Open `http://localhost:3030` in your browser to see the canvas.
 
-If a tool reports that no canvas is connected, repeat that hint and retry.
+If a tool reports that no canvas is connected, pass on the URL from that error
+(if :3030 was busy the server moves to :3031, :3032, … and the error names the
+real one), and retry once the user has it open.
 
 ## Pick the right tool
 

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "tldraw": {
+      "command": "node",
+      "args": ["./server/tldraw-mcp.mjs"],
+      "cwd": ".",
+      "env_vars": ["TLDRAW_MCP_PORT", "TLDRAW_MCP_TIMEOUT_MS"]
+    }
+  }
+}
